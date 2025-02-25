@@ -67,4 +67,3 @@ class DataBase:
         finally:
             self.cerrar()
             
-        
