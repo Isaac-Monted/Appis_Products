@@ -26,36 +26,39 @@ connection.connect((err) => {
   console.log('Conectado a la base de datos MySQL.');
 });
 
-// Ruta GET para obtener datos
-app.get('/api/data', (req, res) => {
-  const query = 'SELECT * FROM tabla_de_datos';  // Cambia esto por el nombre de tu tabla
-
-  connection.query(query, (err, results) => {
-    if (err) {
-      console.error('Error al ejecutar la consulta:', err);
-      return res.status(500).json({ error: 'Error al obtener datos.' });
-    }
-    res.json(results);
-  });
+// Ruta raíz
+app.get('/', (req, res) => {
+    res.send('¡Bienvenido a mi API!');
 });
 
-// Ruta POST para insertar datos
-app.post('/api/data', (req, res) => {
-  const { nombre, edad } = req.body;  // Asegúrate de recibir datos en el formato correcto
+app.get('/lista-productos', (req, res) => {
+    const query = `
+    SELECT
+        PRODUCTOS.NOMBRE AS PRODUCTO,
+        PRODUCTOS.PRESENTACION AS PRESENTACION,
+        PRODUCTOS.MARCA AS MARCA,
+        CATEGORIAS.NOMBRE AS CATEGORIA
+    FROM PRODUCTOS
 
-  const query = 'INSERT INTO tabla_de_datos (nombre, edad) VALUES (?, ?)';
+    INNER JOIN
+        TABLA_ALIMENTICIA
+    ON PRODUCTOS.ID_PRODUCTOS = TABLA_ALIMENTICIA.ID_PRODUCTO
+    
+    INNER JOIN
+        CATEGORIAS
+    ON TABLA_ALIMENTICIA.ID_CATEGORIA = CATEGORIAS.ID_CATEGORIA;`; // Consulta SQL
   
-  connection.query(query, [nombre, edad], (err, results) => {
-    if (err) {
-      console.error('Error al insertar datos:', err);
-      return res.status(500).json({ error: 'Error al insertar datos.' });
-    }
-    res.status(201).json({
-      mensaje: 'Datos insertados correctamente.',
-      id: results.insertId,  // ID del nuevo registro insertado
+    connection.query(query, (err, results) => {
+      if (err) {
+        console.error('Error al hacer la consulta:', err);
+        res.status(500).json({ error: 'Error al consultar la base de datos' });
+        return;
+      }
+  
+      res.json(results);  // Retorna el resultado de la consulta como JSON
     });
   });
-});
+  
 
 // Iniciar el servidor
 app.listen(port, () => {
