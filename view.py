@@ -10,6 +10,8 @@ class View:
         self.page = page
         self.controller = None
         
+        #self.page.horizontal_alignment = ft.CrossAxisAlignment.START
+        
     def Start_App(self):
         """Inicializador de la aplicacion"""
         if self.controller is None:
