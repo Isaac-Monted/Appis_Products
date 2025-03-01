@@ -77,7 +77,10 @@ class Home:
                 ]
             )
 
-        self.BtnLimpiar_All = ft.IconButton(icon=ft.Icons.CLEANING_SERVICES)
+        self.BtnAgregar = ft.FilledButton(text="Agregar Producto", icon=ft.Icons.SAVE, col={"xs":12, "sm":6, "md":4, "lg":2})
+        self.BtnLimpiar_All = ft.FilledButton(text="Limpiar Producto", icon=ft.Icons.CLEANING_SERVICES, col={"xs":12, "sm":6, "md":4, "lg":2})
+        self.BtnEditar = ft.FilledButton(text="Editar Producto", icon=ft.Icons.EDIT, col={"xs":12, "sm":6, "md":4, "lg":2})
+        self.BtnEliminar= ft.FilledButton(text="Eliminar Producto", icon=ft.Icons.DELETE, col={"xs":12, "sm":6, "md":4, "lg":2})
         
         # Datos generales
         self.TxtNombre  = ft.TextField(label="Nombre del Producto", )
@@ -85,11 +88,11 @@ class Home:
         self.TxtPresentacion = ft.TextField(label="Presentacion del Producto", )
         self.TxtMarca = ft.TextField(label="Marca del Producto", )
         
-        self.TxtHistoria = ft.TextField(label="Historia", multiline=True, )
+        self.TxtHistoria = ft.TextField(label="Historia", multiline=True, min_lines=1, max_lines=3, )
         
-        self.BtnEtiqueta = ft.IconButton(icon=ft.Icons.ATTACH_FILE)
-        self.BtnImagen = ft.IconButton(icon=ft.Icons.ATTACH_FILE)
-        self.BtnLimpiar_General = ft.IconButton(icon=ft.Icons.CLEANING_SERVICES)
+        self.BtnEtiqueta = ft.FilledButton(text="Carcar Etiqueta del Producto", icon=ft.Icons.ATTACH_FILE,)
+        self.BtnImagen = ft.FilledButton(text="Cargar Imagen del Producto", icon=ft.Icons.ATTACH_FILE,)
+        self.BtnLimpiar_General = ft.FilledButton(text="Limpiar Contenido", icon=ft.Icons.CLEANING_SERVICES,)
         
         self.Estado_Producto = ft.Dropdown(
             label="Estado del Producto",
@@ -97,25 +100,25 @@ class Home:
         )
 
         #Tabla Alimenticia
-        self.TxtPorcion = ft.TextField(label="Nombre del Producto", )
-        self.TxtContenido_Energetico = ft.TextField(label="Nombre del Producto", )
-        self.TxtProteina = ft.TextField(label="Nombre del Producto", )
-        self.TxtGrasas_Totales = ft.TextField(label="Nombre del Producto", )
-        self.TxtGrasas_Saturadas = ft.TextField(label="Nombre del Producto", )
-        self.TxtGrasas_Trans = ft.TextField(label="Nombre del Producto", )
-        self.TxtCarbohidratos = ft.TextField(label="Nombre del Producto", )
-        self.TxtAzucares_Totales = ft.TextField(label="Nombre del Producto", )
-        self.TxtAzucares_Anadidos = ft.TextField(label="Nombre del Producto", )
-        self.TxtFibra_Dietetica = ft.TextField(label="Nombre del Producto", )
-        self.TxtSodio = ft.TextField(label="Nombre del Producto", )
-        self.TxtHumedad = ft.TextField(label="Nombre del Producto", )
-        self.TxtGrasa_Butirica_Min = ft.TextField(label="Nombre del Producto", )
-        self.TxtProteina_Min = ft.TextField(label="Nombre del Producto", )
+        self.TxtPorcion = ft.TextField(label="Porcion", )
+        self.TxtContenido_Energetico = ft.TextField(label="Contenido Energetico", )
+        self.TxtProteina = ft.TextField(label="Proteina", )
+        self.TxtGrasas_Totales = ft.TextField(label="Grasas Totales", )
+        self.TxtGrasas_Saturadas = ft.TextField(label="Grasas Saturadas", )
+        self.TxtGrasas_Trans = ft.TextField(label="Grasas Trans", )
+        self.TxtCarbohidratos = ft.TextField(label="Carbohidrato", )
+        self.TxtAzucares_Totales = ft.TextField(label="Azucares Totales", )
+        self.TxtAzucares_Anadidos = ft.TextField(label="Azucares Añadidos", )
+        self.TxtFibra_Dietetica = ft.TextField(label="Fibra Dietetica", )
+        self.TxtSodio = ft.TextField(label="Sodio", )
+        self.TxtHumedad = ft.TextField(label="Humedad", )
+        self.TxtGrasa_Butirica_Min = ft.TextField(label="Grasa Butirica Min", )
+        self.TxtProteina_Min = ft.TextField(label="Proteina Min", )
         
-        self.TxtIngredientes = ft.TextField(label="Nombre del Producto", )
-        self.TxtDescripcion = ft.TextField(label="Nombre del Producto", )
+        self.TxtIngredientes = ft.TextField(label="Ingredientes", multiline=True, min_lines=1, max_lines=3, )
+        self.TxtDescripcion = ft.TextField(label="Descripcion", multiline=True, min_lines=1, max_lines=3, )
         
-        self.BtnLimpiar_Tabla_Alimentacia = ft.IconButton(icon=ft.Icons.CLEANING_SERVICES)
+        self.BtnLimpiar_Tabla_Alimentacia = ft.FilledButton(text="Limpiar Contenido", icon=ft.Icons.CLEANING_SERVICES,)
         
     def build_page(self):
         """Constructor de la pagina de inicio"""
@@ -133,7 +136,12 @@ class Home:
                         controls=[
                             ft.Text("Productos Registrados", size=20, weight= ft.FontWeight.BOLD),
                             self.container_table,
-                            ft.Row(controls=[ft.Text("Limpiar Producto", size=18,),self.BtnLimpiar_All]),
+                            ft.ResponsiveRow(controls=[
+                                self.BtnAgregar,
+                                self.BtnLimpiar_All,
+                                self.BtnEditar,
+                                self.BtnEliminar,
+                            ]),
                             ft.Tabs(
                                 selected_index=0,
                                 animation_duration=500,
@@ -146,14 +154,20 @@ class Home:
                                             content=ft.Column(
                                                 scroll=ft.ScrollMode.ADAPTIVE,
                                                 controls=[
+                                                    ft.Text("Datos del Producto", size=20, weight= ft.FontWeight.BOLD),
                                                     self.TxtNombre,
                                                     self.TxtClave,
                                                     self.TxtPresentacion,
                                                     self.TxtMarca,
+                                                    ft.Divider(height=2,color=ft.Colors.TRANSPARENT),
                                                     self.TxtHistoria,
+                                                    ft.Divider(height=2,color=ft.Colors.TRANSPARENT),
                                                     self.BtnEtiqueta,
                                                     self.BtnImagen,
+                                                    ft.Divider(height=2,color=ft.Colors.TRANSPARENT),
                                                     self.Estado_Producto,
+                                                    ft.Divider(height=2,color=ft.Colors.TRANSPARENT),
+                                                    self.BtnLimpiar_General,
                                                 ]
                                             )
                                         )
@@ -165,7 +179,26 @@ class Home:
                                             content=ft.Column(
                                                 scroll=ft.ScrollMode.ADAPTIVE,
                                                 controls=[
-                                                    
+                                                    ft.Text("Informacion Nutrimental", size=20, weight= ft.FontWeight.BOLD),
+                                                    self.TxtPorcion,
+                                                    self.TxtContenido_Energetico,
+                                                    self.TxtProteina,
+                                                    self.TxtGrasas_Totales,
+                                                    self.TxtGrasas_Saturadas,
+                                                    self.TxtGrasas_Trans,
+                                                    self.TxtCarbohidratos,
+                                                    self.TxtAzucares_Totales,
+                                                    self.TxtAzucares_Anadidos,
+                                                    self.TxtFibra_Dietetica,
+                                                    self.TxtSodio,
+                                                    self.TxtHumedad,
+                                                    self.TxtGrasa_Butirica_Min,
+                                                    self.TxtProteina_Min,
+                                                    ft.Divider(height=2,color=ft.Colors.TRANSPARENT),
+                                                    self.TxtIngredientes,
+                                                    self.TxtDescripcion,
+                                                    ft.Divider(height=2,color=ft.Colors.TRANSPARENT),
+                                                    self.BtnLimpiar_Tabla_Alimentacia,
                                                 ]
                                             )
                                         )
