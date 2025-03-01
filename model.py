@@ -1,4 +1,8 @@
+import PIL.Image
 import database as sql
+import base64
+import io
+import PIL
 
 class Model:
     def __init__(self):
@@ -10,3 +14,19 @@ class Model:
         cursor = sql.DataBase()
         values = cursor.execute_query(Query)
         return values
+    
+    def Encode_Imagen(self, Ruta: str):
+        """Convertir imagen a binario"""
+        
+        with open(Ruta, "rb") as image_file:
+            image_base64 = base64.b64encode(image_file.read()).decode("utf-8")
+            
+        return image_base64
+        
+    def Decode_imagen(self, Imagen_Binario: str):
+        """Convertir binario a imagen"""
+        
+        image_data = base64.b64decode(Imagen_Binario)
+        image = PIL.Image.open(io.BytesIO(image_data))
+        
+        return image

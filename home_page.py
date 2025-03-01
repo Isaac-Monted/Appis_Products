@@ -77,10 +77,10 @@ class Home:
                 ]
             )
 
-        self.BtnAgregar = ft.FilledButton(text="Agregar Producto", icon=ft.Icons.SAVE, col={"xs":12, "sm":6, "md":4, "lg":2})
-        self.BtnLimpiar_All = ft.FilledButton(text="Limpiar Producto", icon=ft.Icons.CLEANING_SERVICES, col={"xs":12, "sm":6, "md":4, "lg":2})
-        self.BtnEditar = ft.FilledButton(text="Editar Producto", icon=ft.Icons.EDIT, col={"xs":12, "sm":6, "md":4, "lg":2})
-        self.BtnEliminar= ft.FilledButton(text="Eliminar Producto", icon=ft.Icons.DELETE, col={"xs":12, "sm":6, "md":4, "lg":2})
+        self.BtnAgregar = ft.FilledButton(text="Agregar Producto", icon=ft.Icons.SAVE, col={"xs":12, "sm":6, "md":5, "lg":2}, data="Agregar", on_click=self.on_click_buttons_form)
+        self.BtnLimpiar_All = ft.FilledButton(text="Limpiar Producto", icon=ft.Icons.CLEANING_SERVICES, col={"xs":12, "sm":6, "md":5, "lg":2}, data="Limpiar Todo", on_click=self.on_click_buttons_form)
+        self.BtnEditar = ft.FilledButton(text="Editar Producto", icon=ft.Icons.EDIT, col={"xs":12, "sm":6, "md":5, "lg":2}, data="Editar", on_click=self.on_click_buttons_form)
+        self.BtnEliminar= ft.FilledButton(text="Eliminar Producto", icon=ft.Icons.DELETE, col={"xs":12, "sm":6, "md":5, "lg":2}, data="Eliminar", on_click=self.on_click_buttons_form)
         
         # Datos generales
         self.TxtNombre  = ft.TextField(label="Nombre del Producto", )
@@ -90,9 +90,9 @@ class Home:
         
         self.TxtHistoria = ft.TextField(label="Historia", multiline=True, min_lines=1, max_lines=3, )
         
-        self.BtnEtiqueta = ft.FilledButton(text="Carcar Etiqueta del Producto", icon=ft.Icons.ATTACH_FILE,)
-        self.BtnImagen = ft.FilledButton(text="Cargar Imagen del Producto", icon=ft.Icons.ATTACH_FILE,)
-        self.BtnLimpiar_General = ft.FilledButton(text="Limpiar Contenido", icon=ft.Icons.CLEANING_SERVICES,)
+        self.BtnEtiqueta = ft.FilledButton(text="Carcar Etiqueta del Producto", icon=ft.Icons.ATTACH_FILE,data="Add Etiqueta", on_click=self.on_click_buttons_form)
+        self.BtnImagen = ft.FilledButton(text="Cargar Imagen del Producto", icon=ft.Icons.ATTACH_FILE, data="Add Imagen", on_click=self.on_click_buttons_form)
+        self.BtnLimpiar_General = ft.FilledButton(text="Limpiar Contenido", icon=ft.Icons.CLEANING_SERVICES, data="Limpiar Producto", on_click=self.on_click_buttons_form)
         
         self.Estado_Producto = ft.Dropdown(
             label="Estado del Producto",
@@ -118,7 +118,7 @@ class Home:
         self.TxtIngredientes = ft.TextField(label="Ingredientes", multiline=True, min_lines=1, max_lines=3, )
         self.TxtDescripcion = ft.TextField(label="Descripcion", multiline=True, min_lines=1, max_lines=3, )
         
-        self.BtnLimpiar_Tabla_Alimentacia = ft.FilledButton(text="Limpiar Contenido", icon=ft.Icons.CLEANING_SERVICES,)
+        self.BtnLimpiar_Tabla_Alimentacia = ft.FilledButton(text="Limpiar Contenido", icon=ft.Icons.CLEANING_SERVICES, data="Limpiar Nutrimental", on_click=self.on_click_buttons_form)
         
     def build_page(self):
         """Constructor de la pagina de inicio"""
@@ -205,7 +205,14 @@ class Home:
                                     )
                                 ]
                             ),
-                            ft.FilledButton("Contactos", on_click= lambda e: self.controller.navigate_to("/contactos"))
+                            ft.Text("Acceder a", size=20),
+                            ft.ResponsiveRow(
+                                controls=[
+                                    ft.FilledButton("Contactos", on_click= lambda e: self.controller.navigate_to("/contactos"),  col={"xs":12, "sm":6, "md":5, "lg":2}),
+                                    ft.FilledButton("Categorias", on_click= lambda e: self.controller.navigate_to("/categorias"),  col={"xs":12, "sm":6, "md":5, "lg":2}),
+                                    ft.FilledButton("Resetas", on_click= lambda e: self.controller.navigate_to("/resetas"),  col={"xs":12, "sm":6, "md":5, "lg":2}),
+                                ]
+                            )
                         ]
                     )
                 )
@@ -225,3 +232,25 @@ class Home:
     
     def on_sort_table(self, e):
         pass
+    
+    def on_click_buttons_form(self, e):
+        print("boton presionado:", e.control.data)
+        match e.control.data:
+            case "Agregar":
+                ...
+            case "Limpiar Todo":
+                self.Clear_form()
+            case "Editar":
+                self.Update_config()
+            case "Eliminar":
+                self.Delete_config()
+            case "Add Etiqueta":
+                self.controller.Start_file_picker("Abrir", "Etiqueta")
+            case "Add Imagen":
+                self.controller.Start_file_picker("Abrir", "Imagen")
+            case "Limpiar Producto":
+                ...
+            case "Limpiar Nutrimental":
+                ...
+            case _:
+                ...
