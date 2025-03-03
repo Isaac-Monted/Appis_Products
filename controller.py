@@ -59,11 +59,11 @@ class Controller:
                 
     def Start_alert_dialog(self, type=None, title=None, message=None, description=None, actions=None, functions=None, error= None):
         """Mostrar el cuadro de dialogo de la aplicacion"""
-        self.view.open_alert_dialog(type, title, message, description, actions, functions, error)
+        self.view.Start_alert_dialog(type, title, message, description, actions, functions, error)
         
     def Start_snackbar(self, message: str, color: ft.Colors, duration: int):
         """Mostrar el mensaje en barra de la aplicacion"""
-        self.view.open_snackbar(message, color, duration)
+        self.view.Start_snackbar(message, color, duration)
         
     # Funiones hacia la base de datos y/o modelo
     

@@ -12,6 +12,12 @@ class View:
         self.page = page
         self.controller = None
         
+        # Crear el FilePicker una sola vez
+        self.file_picker = ft.FilePicker()
+        # Agregarlo al overlay de la página
+        self.page.overlay.append(self.file_picker)
+        self.page.update()
+        
         #self.page.horizontal_alignment = ft.CrossAxisAlignment.START
         
     def Start_App(self):
@@ -27,7 +33,7 @@ class View:
         
         self.AppBarr = AppBarr(self.page, self.controller)
         self.AppBarr_Son = AppBarr_Son(self.page, self.controller)
-        self.FilePiker = FilePiker(self.page, self.controller)
+        self.FilePiker = FilePiker(self.page, self.controller, self.file_picker)
         self.loadAppView = LoadAppView(self.page, self.controller)
         
         self.navigate_to("/")
@@ -69,20 +75,20 @@ class View:
         return appbarr
     
     def Start_file_picker(self, control, types):
-        dialog = self.FilePiker.get_content(control)
-        self.page.add(dialog)
-        print(f"Paso con :{control} | {types}")
+        """Iniciar el selector de archivos"""
+        self.FilePiker.setup_for_control(control)
+        
         match types:
             case "Abrir":
                 print("Entro a abrir")
-                dialog.pick_files()
-                "Abrio abrir"
+                self.FilePiker.pick_files()
+                print("Abrió abrir")
             case "Guardar":
-                dialog.save_file()
+                self.FilePiker.save_file()
             case "Multiple":
-                dialog.pick_files(allow_multiple=True)
+                self.FilePiker.pick_files(allow_multiple=True)
             case _:
-                dialog.pick_files()
+                self.FilePiker.pick_files()
         
     def Start_alert_dialog(self, type=None, title=None, message=None, description=None, actions=None, functions=None, error= None):
         self.alertDialog = MessageBox(self.page, type, title, message, description, actions, functions, error)
@@ -93,19 +99,13 @@ class View:
         snackbar.show_snackbar(snackbar.build_snackbar())
                 
 class FilePiker:
-    def __init__(self, page, controller):
+    def __init__(self, page, controller, file_picker):
         self.page = page
         self.controller = controller
+        self.file_picker = file_picker
     
-    def init_content(self, Control):
-        file_picker = ft.FilePicker(
-            on_result=lambda e: self.on_file_selected(e, Control),
-            
-            #allowed_extensions=extencions,
-            #dialog_title=title,
-        )
-        
-        return file_picker
+    def setup_for_control(self, control):
+        self.file_picker.on_result = lambda e: self.on_file_selected(e, control)
     
     def on_file_selected(self, e, control):
         if e.files:
@@ -115,8 +115,11 @@ class FilePiker:
         else:
             print("No se seleccionó ningún archivo.")
     
-    def get_content(self, control):
-        return self.init_content(control)
+    def pick_files(self, allow_multiple=False):
+        self.file_picker.pick_files(allow_multiple=allow_multiple)
+    
+    def save_file(self):
+        self.file_picker.save_file()
     
 class MessageBox:
     def __init__(self,page, type: str, title: str, message: str, description: str=None, actions: list=None, functions: list=None, error: str=None):
