@@ -41,26 +41,7 @@ class Home:
                     tooltip="Marca del producto"
                 ),
             ],
-            rows=[
-                ft.DataRow(
-                    selected=True,
-                    on_select_changed=self.on_selected_table,
-                    cells=[
-                        ft.DataCell(
-                            content=ft.Text(value="0"),
-                        ),
-                        ft.DataCell(
-                            content=ft.Text(value="0"),
-                        ),
-                        ft.DataCell(
-                            content=ft.Text(value="0"),
-                        ),
-                        ft.DataCell(
-                            content=ft.Text(value="0"),
-                        ),
-                    ]
-                )
-            ]
+            rows=[]
         )
         
         self.container_table = ft.Column(
@@ -120,6 +101,9 @@ class Home:
         
         self.BtnLimpiar_Tabla_Alimentacia = ft.FilledButton(text="Limpiar Contenido", icon=ft.Icons.CLEANING_SERVICES, data="Limpiar Nutrimental", on_click=self.on_click_buttons_form)
         
+        # Llenar la tabla con los registros
+        print(self.Read_Dates("Tabla"))
+    
     def build_page(self):
         """Constructor de la pagina de inicio"""
         Page = ft.View(
@@ -237,20 +221,163 @@ class Home:
         print("boton presionado:", e.control.data)
         match e.control.data:
             case "Agregar":
-                ...
+                self.Create_Register()
             case "Limpiar Todo":
-                self.Clear_form()
+                self.Clear_Form_All()
             case "Editar":
-                self.Update_config()
+                self.Update_Registrer()
             case "Eliminar":
-                self.Delete_config()
+                self.Delete_Register()
             case "Add Etiqueta":
                 self.controller.Start_file_picker("Abrir", "Etiqueta")
             case "Add Imagen":
                 self.controller.Start_file_picker("Abrir", "Imagen")
             case "Limpiar Producto":
-                ...
+                self.Clear_Form_General()
             case "Limpiar Nutrimental":
-                ...
+                self.Clear_Form_Nutrimental()
             case _:
                 ...
+                
+    def Create_Register(self):
+        ...
+        
+    def Clear_Form_All(self):
+        self.Clear_Form_General()
+        self.Clear_Form_Nutrimental()
+        
+    def Clear_Form_General(self):
+        self.TxtNombre.value = ""
+        self.TxtClave.value = ""
+        self.TxtPresentacion.value = ""
+        self.TxtMarca.value = ""
+        self.TxtHistoria.value = ""
+        self.Estado_Producto.value = ""
+        
+        self.page.update()
+        
+    def Clear_Form_Nutrimental(self):
+        self.TxtPorcion.value = ""
+        self.TxtContenido_Energetico.value = ""
+        self.TxtProteina.value = ""
+        self.TxtGrasas_Totales.value = ""
+        self.TxtGrasas_Saturadas.value = ""
+        self.TxtGrasas_Trans.value = ""
+        self.TxtCarbohidratos.value = ""
+        self.TxtAzucares_Totales.value = ""
+        self.TxtAzucares_Anadidos.value = ""
+        self.TxtFibra_Dietetica.value = ""
+        self.TxtSodio.value = ""
+        self.TxtHumedad.value = ""
+        self.TxtGrasa_Butirica_Min.value = ""
+        self.TxtProteina_Min.value = ""
+        self.TxtIngredientes.value = ""
+        self.TxtDescripcion.value = ""
+        
+        self.page.update()
+        
+    def Read_Dates(self, Mode:str):
+        match Mode:
+            case "Tabla":
+                Datos = self.controller.Execute_Query("""
+                SELECT
+                    PRODUCTOS.ID_PRODUCTOS,
+                    PRODUCTOS.NOMBRE,
+                    PRODUCTOS.CLAVE,
+                    PRODUCTOS.PRESENTACION,
+                    PRODUCTOS.MARCA
+                FROM
+                    PRODUCTOS;
+            """)
+            case "General":
+                Datos = self.controller.Execute_Query("""
+                SELECT
+                    PRODUCTOS.ID_PRODUCTOS,
+                    PRODUCTOS.NOMBRE,
+                    PRODUCTOS.CLAVE,
+                    PRODUCTOS.PRESENTACION,
+                    PRODUCTOS.MARCA,
+                    PRODUCTOS.HISTORIA,
+                    PRODUCTOS.STATUS,
+                    TABLA_ALIMENTICIA.PORCION,
+                    TABLA_ALIMENTICIA.CONTENIDO_ENERGETICO,
+                    TABLA_ALIMENTICIA.PROTEINA,
+                    TABLA_ALIMENTICIA.GRASAS_TOTALES,
+                    TABLA_ALIMENTICIA.GRASAS_SATURADAS,
+                    TABLA_ALIMENTICIA.GRASAS_TRANS,
+                    TABLA_ALIMENTICIA.CARBOHIDRATOS,
+                    TABLA_ALIMENTICIA.AZUCARES_TOTALES,
+                    TABLA_ALIMENTICIA.AZUCARES_AÑADIDOS,
+                    TABLA_ALIMENTICIA.FIBRA_DIETETICA,
+                    TABLA_ALIMENTICIA.SODIO,
+                    TABLA_ALIMENTICIA.HUMEDAD,
+                    TABLA_ALIMENTICIA.GRASA_BUTIRICA_MIN,
+                    TABLA_ALIMENTICIA.PROTEINA_MIN,
+                    TABLA_ALIMENTICIA.INGREDIENTES,
+                    TABLA_ALIMENTICIA.DESCRIPCION,
+                    CATEGORIAS.NOMBRE
+                FROM
+                    PRODUCTOS
+                INNER JOIN
+                    TABLA_ALIMENTICIA
+                ON PRODUCTOS.ID_PRODUCTOS = TABLA_ALIMENTICIA.ID_PRODUCTO
+
+                INNER JOIN
+                    CATEGORIAS
+                ON TABLA_ALIMENTICIA.ID_CATEGORIA = CATEGORIAS.ID_CATEGORIA;
+            """)
+            case "Producto":
+                Datos = self.controller.Execute_Query("""
+                SELECT
+                    PRODUCTOS.ID_PRODUCTOS,
+                    PRODUCTOS.NOMBRE,
+                    PRODUCTOS.CLAVE,
+                    PRODUCTOS.PRESENTACION,
+                    PRODUCTOS.MARCA,
+                    PRODUCTOS.HISTORIA,
+                    PRODUCTOS.STATUS
+                    
+                FROM
+                    PRODUCTOS;
+            """)
+            case "Nutrimental":
+                Datos = self.controller.Execute_Query("""
+                SELECT
+                    PRODUCTOS.ID_PRODUCTOS,
+                    TABLA_ALIMENTICIA.PORCION,
+                    TABLA_ALIMENTICIA.CONTENIDO_ENERGETICO,
+                    TABLA_ALIMENTICIA.PROTEINA,
+                    TABLA_ALIMENTICIA.GRASAS_TOTALES,
+                    TABLA_ALIMENTICIA.GRASAS_SATURADAS,
+                    TABLA_ALIMENTICIA.GRASAS_TRANS,
+                    TABLA_ALIMENTICIA.CARBOHIDRATOS,
+                    TABLA_ALIMENTICIA.AZUCARES_TOTALES,
+                    TABLA_ALIMENTICIA.AZUCARES_AÑADIDOS,
+                    TABLA_ALIMENTICIA.FIBRA_DIETETICA,
+                    TABLA_ALIMENTICIA.SODIO,
+                    TABLA_ALIMENTICIA.HUMEDAD,
+                    TABLA_ALIMENTICIA.GRASA_BUTIRICA_MIN,
+                    TABLA_ALIMENTICIA.PROTEINA_MIN,
+                    TABLA_ALIMENTICIA.INGREDIENTES,
+                    TABLA_ALIMENTICIA.DESCRIPCION,
+                    CATEGORIAS.NOMBRE
+                FROM
+                    PRODUCTOS
+                INNER JOIN
+                    TABLA_ALIMENTICIA
+                ON PRODUCTOS.ID_PRODUCTOS = TABLA_ALIMENTICIA.ID_PRODUCTO
+
+                INNER JOIN
+                    CATEGORIAS
+                ON TABLA_ALIMENTICIA.ID_CATEGORIA = CATEGORIAS.ID_CATEGORIA;
+            """)
+            case _:
+                Datos = []
+                
+        return Datos
+        
+    def Update_Registrer(self):
+        ...
+        
+    def Delete_Register(self):
+        ...
