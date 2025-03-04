@@ -203,6 +203,18 @@ class Home:
                                                 ]
                                             )
                                         )
+                                    ),
+                                    ft.Tab(
+                                        text="Resetas",
+                                        content=ft.Container(
+                                            padding=20,
+                                            content=ft.Column(
+                                                scroll=ft.ScrollMode.ADAPTIVE,
+                                                controls=[
+                                                    ft.Text("Resetas con este Producto", size=20, weight= ft.FontWeight.BOLD),
+                                                ]
+                                            )
+                                        )
                                     )
                                 ]
                             ),
@@ -304,11 +316,11 @@ class Home:
             case "Eliminar":
                 self.Delete_Register()
             case "Add Etiqueta":
-                self.controller.Start_file_picker("Abrir", "Etiqueta")
+                self.controller.Start_file_picker("Abrir", "Etiqueta", self.TxtID.value)
             case "Ver Etiqueta":
                 self.ViewImage(e.control.data)
             case "Add Imagen":
-                self.controller.Start_file_picker("Abrir", "Imagen")
+                self.controller.Start_file_picker("Abrir", "Imagen", self.TxtID.value)
             case "Ver Imagen":
                 self.ViewImage(e.control.data)
             case "Limpiar Producto":
@@ -472,25 +484,32 @@ class Home:
         return Datos
     
     def ViewImage(self, data):
-        if self.TxtID.value == "" or self.TxtID.value == " ":
-            Id = 1
-        else:
-            Id = self.TxtID.value
-        
-        imagen = self.Read_Dates("Imagenes", Id)
-        
-        if imagen:
-            img = imagen[0]
-        else:
-            img = [None, None]
+        try:
+            if self.TxtID.value == "" or self.TxtID.value == " ":
+                Id = 1
+                raise ValueError("No se ha seleccionado ningun producto")
+            else:
+                Id = self.TxtID.value
             
-        match data:
-            case "Ver Etiqueta":
-                self.controller.Start_View_Photo(img[0])
-            case "Ver Imagen":
-                self.controller.Start_View_Photo(img[1])
-            case _:
-                ...
+            imagen = self.Read_Dates("Imagenes", Id)
+            
+            if imagen:
+                img = imagen[0]
+            else:
+                img = [None, None]
+            
+            match data:
+                case "Ver Etiqueta":
+                    print()
+                    foto = self.controller.Convert_image_to_binary(Mode="Decode_Blob",Imagen_binary=img[0])
+                    self.controller.Start_View_Photo(foto)
+                case "Ver Imagen":
+                    foto = self.controller.Convert_image_to_binary("Decode_Blob",img[1])
+                    self.controller.Start_View_Photo(foto)
+                case _:
+                    ...
+        except Exception as err:
+            self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description="No se ha seleccionado ningun producto",)
         
     def Update_Registrer(self):
         ...

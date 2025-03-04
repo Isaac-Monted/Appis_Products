@@ -9,17 +9,17 @@ class Model:
         """Logica de la aplicacion"""
         pass
     
-    def Execute_Query (self, Query: str):
+    def Execute_Query (self, Query: str, params: tuple = None):
         """Ejecuta un Query de MySQL si es un `SELECT` retornara una lista"""
         cursor = sql.DataBase()
-        values = cursor.execute_query(Query)
+        values = cursor.execute_query(Query, params)
         return values
     
     def Encode_Imagen(self, Ruta: str):
         """Convertir imagen a binario"""
         
         with open(Ruta, "rb") as image_file:
-            image_base64 = base64.b64encode(image_file.read()).decode("utf-8")
+            image_base64 = base64.b64encode(image_file.read()) .decode("utf-8")
             
         return image_base64
         
@@ -30,3 +30,10 @@ class Model:
         image = PIL.Image.open(io.BytesIO(image_data))
         
         return image
+        
+    def UFT_8_Decode_image(self, Blob: bytes) -> str:
+        Imagen = base64.b64encode(Blob).decode('utf-8')
+        
+        return Imagen
+        
+        

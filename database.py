@@ -25,45 +25,40 @@ class DataBase:
         """Cerrar la coneccion con la base de datos"""
         self.conn.close()
         
-    def execute_query(self, query: str):
+    def execute_query(self, query: str, params: tuple = None):
         """Ejecuta consultas SQL en una base de datos MySQL.
 
-        Esta función permite ejecutar consultas de tipo `INSERT`, `SELECT`, `UPDATE` o `DELETE`. Es importante asegurarse de que la consulta esté correctamente escrita, ya que, de lo contrario, se generará un error.
+        Esta función permite ejecutar consultas de tipo `INSERT`, `SELECT`, `UPDATE` o `DELETE`. Se recomienda usar parámetros para evitar problemas de inyección SQL.
 
         Args:
-            query (str): Consulta SQL a ejecutar. Puede ser una instrucción para insertar, seleccionar, actualizar o eliminar datos en la base de datos.
+            query (str): Consulta SQL a ejecutar.
+            params (tuple): Parámetros a insertar en la consulta (si es necesario). Default es `None`.
 
         Returns:
-            list: En caso de una consulta `SELECT`, devuelve una lista de tuplas, donde cada tupla representa una fila de resultados con sus respectivos valores:
-            ```
-                [
-                    (dato1, valor1),
-                    (dato2, valor2),
-                    ...
-                ]
-            ```
-            En caso de consultas `INSERT`, `UPDATE` o `DELETE`, la función no retorna ningún valor.
-
-        Examples:
-            -"SELECT * FROM tabla;"
-            
-            -"INSERT INTO tabla (columna1, columna2) VALUES (valor1, valor2);"
+            list: Si la consulta es un `SELECT`, devuelve una lista de tuplas.
+            int: En el caso de consultas `INSERT`, `UPDATE` o `DELETE`, devuelve el número de filas afectadas.
+            None: Si ocurre un error durante la ejecución.
         """
         try:
-            self.cursor.execute(query)
+            # Ejecutar la consulta con parámetros, si los hay
+            if params:
+                self.cursor.execute(query, params)
+            else:
+                self.cursor.execute(query)
 
             # Si la consulta es de tipo SELECT, obtenemos los resultados
             if query.strip().upper().startswith('SELECT'):
-                count = self.cursor.fetchall()
-                return count
+                result = self.cursor.fetchall()
+                return result  # Devuelve las filas seleccionadas
 
-            # Si es una consulta de tipo INSERT, UPDATE o DELETE, ejecutamos y retornamos el número de filas afectadas
+            # Si es una consulta de tipo INSERT, UPDATE o DELETE, hacer commit y devolver el número de filas afectadas
             self.conn.commit()
-            return self.cursor.rowcount  # Número de filas afectadas
+            return self.cursor.rowcount  # Número de filas afectadas por la consulta
 
         except Exception as e:
             print(f"Error al ejecutar la consulta: {e}")
             return None
+
         finally:
-            self.cerrar()
+            self.cerrar()  # Cerrar la conexión y el cursor
             
