@@ -52,8 +52,11 @@ class Controller:
         match Mode:
             case "Etiqueta":
                 print(f"Importar de la ruta: {root}")
-            case "Producto":
+                binary = self.Convert_image_to_binary(root)
+            case "Imagen":
                 print(f"Exportar de la ruta: {root}")
+                binary = self.Convert_image_to_binary(root)
+                self.Execute_Query()
             case _:
                 print("Se cancela la operacion")
                 
@@ -64,6 +67,13 @@ class Controller:
     def Start_snackbar(self, message: str, color: ft.Colors, duration: int):
         """Mostrar el mensaje en barra de la aplicacion"""
         self.view.Start_snackbar(message, color, duration)
+    
+    def Start_View_Photo(self, Img):
+        """Mostrar la imagen en pantalla"""
+        if Img == None:
+            Img = ""
+            
+        self.view.Start_View_Photo(Img)
         
     # Funiones hacia la base de datos y/o modelo
     
@@ -98,7 +108,13 @@ class Controller:
     def Convert_image_to_binary(self,Mode:str, Root:str = None, Imagen_binary: str = None):
         """Mostrar la barra de la aplicacion"""
         match Mode:
-            case "":
+            case "Encode":
+                base64 = self.model.Encode_Imagen(Root)
+                return base64
+            case "Decode":
+                imagen = self.model.Decode_imagen(Imagen_binary)
+                return imagen
+            case _:
                 ...
     
     

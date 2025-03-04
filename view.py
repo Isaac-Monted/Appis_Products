@@ -35,6 +35,7 @@ class View:
         self.AppBarr_Son = AppBarr_Son(self.page, self.controller)
         self.FilePiker = FilePiker(self.page, self.controller, self.file_picker)
         self.loadAppView = LoadAppView(self.page, self.controller)
+        self.loadPhotoView = LoadPhotoView(self.page, self.controller)
         
         self.navigate_to("/")
         
@@ -97,6 +98,10 @@ class View:
     def Start_snackbar(self, message: str, color: ft.Colors, duration: int):
         snackbar = SnackBar(self.page, message, color, duration)
         snackbar.show_snackbar(snackbar.build_snackbar())
+        
+    def Start_View_Photo(self, Img):
+        visor = self.loadPhotoView.buld_img_view(Img)
+        self.loadPhotoView.show_load_img_view(visor)
                 
 class FilePiker:
     def __init__(self, page, controller, file_picker):
@@ -291,4 +296,25 @@ class LoadAppView:
     
     def hide_load_app_view(self):
         self.page.close(self.load)
-  
+
+class LoadPhotoView:
+    def __init__(self, page, controller, ):
+        self.page = page
+        self.controller = controller
+        
+    def buld_img_view(self, Img):
+        self.load = ft.AlertDialog(
+            modal=False,
+            content=ft.Column(
+                alignment=ft.MainAxisAlignment.CENTER,
+                controls=[
+                    ft.Image(src_base64=Img, width=350, height=350)
+                ]
+            )
+        )
+        
+    def show_load_img_view(self, viewer):
+        self.page.open(viewer)
+    
+    def hide_load_img_view(self, viewer):
+        self.page.close(viewer)
