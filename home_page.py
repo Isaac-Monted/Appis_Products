@@ -500,16 +500,21 @@ class Home:
             
             match data:
                 case "Ver Etiqueta":
-                    print()
-                    foto = self.controller.Convert_image_to_binary(Mode="Decode_Blob",Imagen_binary=img[0])
+                    if img[0] != None:
+                        foto = self.controller.Convert_image_to_binary(Mode="Decode_Blob",Imagen_binary=img[0])
+                    else:
+                        foto = None
                     self.controller.Start_View_Photo(foto)
                 case "Ver Imagen":
-                    foto = self.controller.Convert_image_to_binary("Decode_Blob",img[1])
+                    if img[1] != None:
+                        foto = self.controller.Convert_image_to_binary("Decode_Blob",img[1])
+                    else:
+                        foto = None
                     self.controller.Start_View_Photo(foto)
                 case _:
                     ...
         except Exception as err:
-            self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description="No se ha seleccionado ningun producto",)
+            self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
         
     def Update_Registrer(self):
         ...

@@ -65,6 +65,7 @@ class Controller:
                         SET IMAGEN_ETIQUETA = %s
                         WHERE ID_PRODUCTOS = %s;
                     """,(binary, Id))
+                    self.Start_snackbar("Guardado Exitoso", ft.Colors.GREEN, 4000)
                 case "Imagen":
                     print(f"Exportar de la ruta: {root}, Id: {Id}")
                     binary = self.Convert_image_to_binary("Encode",root)
@@ -73,10 +74,12 @@ class Controller:
                         SET IMAGEN_PRODUCTO = %s
                         WHERE ID_PRODUCTOS = %s;
                     """,(binary, Id))
+                    self.Start_snackbar("Guardado Exitoso", ft.Colors.GREEN, 4000)
                 case _:
                     print("Se cancela la operacion")
         except Exception as err:
-            self.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
+            #self.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
+            self.Start_snackbar("Error al actualizar", ft.Colors.RED, 4000)
                 
     def Start_alert_dialog(self, type=None, title=None, message=None, description=None, actions=None, functions=None, error= None):
         """Mostrar el cuadro de dialogo de la aplicacion"""

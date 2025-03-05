@@ -32,7 +32,7 @@ class Model:
         return image
         
     def UFT_8_Decode_image(self, Blob: bytes) -> str:
-        Imagen = base64.b64encode(Blob).decode('utf-8')
+        Imagen = Blob.decode('utf-8')
         
         return Imagen
         
