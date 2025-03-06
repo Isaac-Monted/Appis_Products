@@ -41,6 +41,8 @@ class View:
         
         self.navigate_to("/")
         
+        self.Start_View_Photo(self.Assets.Get_Image("Panela"))
+        
     def go_back(self):
         """Regresar a la vista anterior"""
         if len(self.page.views) > 1:
@@ -194,7 +196,10 @@ class MessageBox:
                 )
                 return mensaje
             case "options":
-                actions = [ft.TextButton(option, on_click=lambda e, func=func: func()) for option, func in zip(self.actions, self.functions)]
+                if self.message is None:
+                    print("Error: self.message is None")
+
+                # Crear el cuadro de diálogo primero
                 mensaje = ft.AlertDialog(
                     title=ft.Text(self.title),  # Título del cuadro de diálogo
                     content=ft.Container(
@@ -202,8 +207,34 @@ class MessageBox:
                         width=300,  # Ajustamos el ancho del contenedor
                         height=100,  # Ajustamos la altura del contenedor
                     ),
-                actions=actions,  # Botón para cerrar
+                    actions=[],  # De momento, sin botones, los agregamos después
                 )
+
+                # Depuración: Verifica los valores de las variables antes de crear el mensaje
+                print(f"Título del cuadro de diálogo: {self.title}")
+                print(f"Mensaje del cuadro de diálogo: {self.message}")
+
+                # Crear las acciones de los botones dinámicamente
+                actions = [
+                    ft.TextButton(
+                        option, 
+                        # Aquí se asegura de que las funciones no se ejecuten inmediatamente
+                        on_click=lambda e, func=func, mensaje=mensaje: (func() if func else None, self.page.close(mensaje))
+                    )
+                    for option, func in zip(self.actions, self.functions)
+                ]
+
+                # Actualizar los botones en el cuadro de diálogo
+                mensaje.actions = actions
+
+                # Verifica que 'mensaje' esté correctamente creado
+                if mensaje is None:
+                    print("Error: No se pudo crear el cuadro de diálogo")
+                else:
+                    print("Cuadro de diálogo creado correctamente")
+
+                # Retorna el cuadro de diálogo
+                return mensaje
             case "descriptive":
                 mensaje = ft.AlertDialog(
                     title=ft.Text(self.title),  # Título del cuadro de diálogo

@@ -66,6 +66,7 @@ class Home:
         # Datos generales
         self.TxtID = ft.TextField(label="Id del Producto", visible=False)
         self.TxtNombre  = ft.TextField(label="Nombre del Producto", )
+        self.LabelNombre = ft.Text(value="Producto Seleccionado: ", size=18)
         self.TxtClave = ft.TextField(label="Clave del Producto", )
         self.TxtPresentacion = ft.TextField(label="Presentacion del Producto", )
         self.TxtMarca = ft.TextField(label="Marca del Producto", )
@@ -77,6 +78,8 @@ class Home:
         self.BtnLimpiar_General = ft.FilledButton(text="Limpiar Contenido", icon=ft.Icons.CLEANING_SERVICES, data="Limpiar Producto", on_click=self.on_click_buttons_form)
         self.BtnVerEtiqueta = ft.IconButton(icon=ft.Icons.IMAGE, data="Ver Etiqueta", tooltip="Ver Etiqueta", on_click=self.on_click_buttons_form)
         self.BtnVerImagen = ft.IconButton(icon=ft.Icons.IMAGE, data="Ver Imagen", tooltip="Ver Imagen", on_click=self.on_click_buttons_form)
+        self.BtnLimpiarEtiqueta = ft.IconButton(icon=ft.Icons.CLEANING_SERVICES, data="Limpiar Etiqueta", tooltip="Limpiar Etiqueta", on_click=self.on_click_buttons_form)
+        self.BtnLimpiarImagen = ft.IconButton(icon=ft.Icons.CLEANING_SERVICES, data="Limpiar Imagen", tooltip="Limpiar Imagen", on_click=self.on_click_buttons_form)
         
         self.Estado_Producto = ft.Dropdown(
             label="Estado del Producto",
@@ -135,6 +138,7 @@ class Home:
                                 self.BtnEditar,
                                 self.BtnEliminar,
                             ]),
+                            self.LabelNombre,
                             ft.Tabs(
                                 selected_index=0,
                                 animation_duration=500,
@@ -158,11 +162,13 @@ class Home:
                                                     ft.Divider(height=2,color=ft.Colors.TRANSPARENT),
                                                     ft.Row(controls=[
                                                         self.BtnEtiqueta,
-                                                        self.BtnVerEtiqueta
+                                                        self.BtnVerEtiqueta,
+                                                        self.BtnLimpiarEtiqueta
                                                     ]),
                                                     ft.Row(controls=[
                                                         self.BtnImagen,
-                                                        self.BtnVerImagen
+                                                        self.BtnVerImagen,
+                                                        self.BtnLimpiarImagen
                                                     ]),
                                                     ft.Divider(height=2,color=ft.Colors.TRANSPARENT),
                                                     self.Estado_Producto,
@@ -273,6 +279,7 @@ class Home:
             print(valores)
             self.TxtID.value = valores[0]
             self.TxtNombre.value = valores[1]
+            self.LabelNombre.value = f"Producto Seleccionado: {valores[1]}"
             self.TxtClave.value = valores[2]
             self.TxtPresentacion.value = valores[3]
             self.TxtMarca.value = valores[4]
@@ -319,10 +326,15 @@ class Home:
                 self.controller.Start_file_picker("Abrir", "Etiqueta", self.TxtID.value)
             case "Ver Etiqueta":
                 self.ViewImage(e.control.data)
+            case "Limpiar Etiqueta":
+                self.controller.Start_alert_dialog(type="options", title="Confirmar", message="Esta seguro de Eliminar la imagen", actions=["Aceptar","Cancelar","Ver"], functions=[self.ClearImagen(e.control.data),None, self.ViewImage("Ver Etiqueta")])
+                #self.ClearImagen(e.control.data)
             case "Add Imagen":
                 self.controller.Start_file_picker("Abrir", "Imagen", self.TxtID.value)
             case "Ver Imagen":
                 self.ViewImage(e.control.data)
+            case "Limpiar Imagen":
+                self.ClearImagen(e.control.data)
             case "Limpiar Producto":
                 self.Clear_Form_General()
             case "Limpiar Nutrimental":
@@ -340,6 +352,7 @@ class Home:
     def Clear_Form_General(self):
         self.TxtID.value = ""
         self.TxtNombre.value = ""
+        self.LabelNombre.value = "Producto Seleccionado: "
         self.TxtClave.value = ""
         self.TxtPresentacion.value = ""
         self.TxtMarca.value = ""
@@ -482,6 +495,34 @@ class Home:
                 Datos = []
                 
         return Datos
+    
+    def ClearImagen(self, data):
+        try:
+            if self.TxtID.value == "" or self.TxtID.value == " ":
+                Id = 1
+                raise ValueError("No se ha seleccionado ningun producto")
+            else:
+                Id = self.TxtID.value
+                
+            match data:
+                case "Limpiar Etiqueta":
+                    #self.controller.Execute_Query(f"""
+                    #    UPDATE PRODUCTOS
+                    #    SET IMAGEN_ETIQUETA = %s
+                    #    WHERE ID_PRODUCTOS = %s;
+                    #""",(None, Id))
+                    self.controller.Start_snackbar("Imagen Eliminada", ft.Colors.GREEN, 4000)
+                case "Limpiar Imagen":
+                    self.Controller.Execute_Query(f"""
+                        UPDATE PRODUCTOS
+                        SET IMAGEN_PRODUCTO = %s
+                        WHERE ID_PRODUCTOS = %s;
+                    """,(None, Id))
+                    self.controller.Start_snackbar("Imagen Eliminada", ft.Colors.GREEN, 4000)
+                case _:
+                    self.controller.Start_snackbar("Error al actualizar", ft.Colors.RED, 4000)
+        except Exception as err:
+            self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
     
     def ViewImage(self, data):
         try:

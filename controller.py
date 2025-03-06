@@ -60,6 +60,8 @@ class Controller:
                 case "Etiqueta":
                     print(f"Importar de la ruta: {root}, Id: {Id}")
                     binary = self.Convert_image_to_binary("Encode",root)
+                    #print(f"Tamaño de la cadena Base64: {len(binary)}")
+                    #print(binary)
                     self.Execute_Query(f"""
                         UPDATE PRODUCTOS
                         SET IMAGEN_ETIQUETA = %s
