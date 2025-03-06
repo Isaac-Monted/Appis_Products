@@ -196,10 +196,17 @@ class MessageBox:
                 )
                 return mensaje
             case "options":
+                # Verificar que self.message no sea None
                 if self.message is None:
-                    print("Error: self.message is None")
+                    raise ValueError("Message cannot be None for options type.")
 
-                # Crear el cuadro de diálogo primero
+                # Verificar que actions y functions no sean None y tengan la misma longitud
+                if self.actions is None or self.functions is None:
+                    raise ValueError("Actions and functions must be provided for options type.")
+                if len(self.actions) != len(self.functions):
+                    raise ValueError("Actions and functions must have the same length.")
+
+                # Crear el cuadro de diálogo
                 mensaje = ft.AlertDialog(
                     title=ft.Text(self.title),  # Título del cuadro de diálogo
                     content=ft.Container(
@@ -207,33 +214,36 @@ class MessageBox:
                         width=300,  # Ajustamos el ancho del contenedor
                         height=100,  # Ajustamos la altura del contenedor
                     ),
-                    actions=[],  # De momento, sin botones, los agregamos después
+                    actions=[],  # Inicialmente sin botones, los agregamos después
                 )
 
-                # Depuración: Verifica los valores de las variables antes de crear el mensaje
+                # Depuración: Verificar los valores de las variables
                 print(f"Título del cuadro de diálogo: {self.title}")
                 print(f"Mensaje del cuadro de diálogo: {self.message}")
+                print(f"Actions: {self.actions}")
+                print(f"Functions: {self.functions}")
 
                 # Crear las acciones de los botones dinámicamente
                 actions = [
                     ft.TextButton(
                         option, 
-                        # Aquí se asegura de que las funciones no se ejecuten inmediatamente
                         on_click=lambda e, func=func, mensaje=mensaje: (func() if func else None, self.page.close(mensaje))
                     )
                     for option, func in zip(self.actions, self.functions)
                 ]
 
+                # Verificar que actions no esté vacío
+                if not actions:
+                    raise ValueError("Actions list cannot be empty for options type.")
+
                 # Actualizar los botones en el cuadro de diálogo
                 mensaje.actions = actions
 
-                # Verifica que 'mensaje' esté correctamente creado
+                # Verificar que 'mensaje' esté correctamente creado
                 if mensaje is None:
-                    print("Error: No se pudo crear el cuadro de diálogo")
-                else:
-                    print("Cuadro de diálogo creado correctamente")
+                    raise RuntimeError("Failed to create the dialog box.")
 
-                # Retorna el cuadro de diálogo
+                # Retornar el cuadro de diálogo
                 return mensaje
             case "descriptive":
                 mensaje = ft.AlertDialog(

@@ -327,7 +327,7 @@ class Home:
             case "Ver Etiqueta":
                 self.ViewImage(e.control.data)
             case "Limpiar Etiqueta":
-                self.controller.Start_alert_dialog(type="options", title="Confirmar", message="Esta seguro de Eliminar la imagen", actions=["Aceptar","Cancelar","Ver"], functions=[self.ClearImagen(e.control.data),None, self.ViewImage("Ver Etiqueta")])
+                self.controller.Start_alert_dialog(type="options", title="Confirmar", message="Esta seguro de Eliminar la imagen", actions=["Aceptar","Cancelar","Ver"], functions=[lambda: self.ClearImagen("Limpiar Etiqueta"), None, lambda: self.ViewImage("Ver Etiqueta")])
                 #self.ClearImagen(e.control.data)
             case "Add Imagen":
                 self.controller.Start_file_picker("Abrir", "Imagen", self.TxtID.value)
