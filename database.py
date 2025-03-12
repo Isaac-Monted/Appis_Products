@@ -39,6 +39,7 @@ class DataBase:
             int: En el caso de consultas `INSERT`, `UPDATE` o `DELETE`, devuelve el número de filas afectadas.
             None: Si ocurre un error durante la ejecución.
         """
+        print(query)
         try:
             # Ejecutar la consulta con parámetros, si los hay
             if params:
@@ -61,4 +62,33 @@ class DataBase:
 
         finally:
             self.cerrar()  # Cerrar la conexión y el cursor
+            
+            
+    def execute_multiple_queries(self, queries: list, params_list: list = None):
+        """Ejecuta múltiples consultas SQL de manera secuencial en una transacción.
+
+        Args:
+            queries (list): Lista de consultas SQL a ejecutar.
+            params_list (list): Lista de tuplas de parámetros correspondientes a cada consulta.
+
+        Returns:
+            bool: True si todas las consultas se ejecutaron correctamente, False en caso de error.
+        """
+        try:
+            # Iniciar la transacción
+            self.conn.start_transaction()
+
+            # Ejecutar cada consulta
+            for i, query in enumerate(queries):
+                params = params_list[i] if params_list else None
+                self.execute_query(query, params)  # Llamar a execute_query para cada consulta
+
+            # Confirmar la transacción
+            self.conn.commit()
+            return True
+
+        except Exception as e:
+            print(f"Error al ejecutar múltiples consultas: {e}")
+            self.conn.rollback()  # Revertir en caso de error
+            return False
             

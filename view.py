@@ -41,7 +41,7 @@ class View:
         
         self.navigate_to("/")
         
-        self.Start_View_Photo(self.Assets.Get_Image("Panela"))
+        #self.Start_View_Photo(self.Assets.Get_Image("Panela"))
         
     def go_back(self):
         """Regresar a la vista anterior"""

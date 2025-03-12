@@ -7,7 +7,7 @@ class Home:
         self.controller = controller
         
         self.Estados_de_productos = ['ACTIVO', 'INACTIVO', 'DESCONOCIDO']
-        self.Categoria_Productos = self.controller.Execute_Query("SELECT CATEGORIAS.NOMBRE FROM CATEGORIAS WHERE STATUS = 'ACTIVO';")
+        self.Categoria_de_Productos = self.controller.Execute_Query("SELECT CATEGORIAS.ID_CATEGORIA, CATEGORIAS.NOMBRE FROM CATEGORIAS WHERE STATUS = 'ACTIVO';")
         
         # Componentes
         self.table_productos = ft.DataTable(
@@ -43,7 +43,9 @@ class Home:
             rows=[]
         )
         
-        self.container_table = ft.Column(
+        self.container_table = ft.Container(
+            padding=10,
+            content=ft.Column(
                 alignment=ft.MainAxisAlignment.START,
                 #expand=True,
                 scroll=ft.ScrollMode.AUTO,
@@ -57,6 +59,7 @@ class Home:
                     )
                 ]
             )
+        )
 
         self.BtnAgregar = ft.FilledButton(text="Agregar Producto", icon=ft.Icons.SAVE, col={"xs":12, "sm":6, "md":5, "lg":2}, data="Agregar", on_click=self.on_click_buttons_form)
         self.BtnLimpiar_All = ft.FilledButton(text="Limpiar Producto", icon=ft.Icons.CLEANING_SERVICES, col={"xs":12, "sm":6, "md":5, "lg":2}, data="Limpiar Todo", on_click=self.on_click_buttons_form)
@@ -88,7 +91,7 @@ class Home:
         
         self.Categorias_Producto = ft.Dropdown(
             label="Categoria del Producto",
-            options=[ft.dropdown.Option(categoria[0]) for categoria in self.Categoria_Productos]
+            options=[ft.dropdown.Option(categoria[0],categoria[1]) for categoria in self.Categoria_de_Productos]
         )
 
         #Tabla Alimenticia
@@ -343,7 +346,80 @@ class Home:
                 ...
                 
     def Create_Register(self):
-        ...
+        try:
+            if self.TxtNombre.value == "" or self.TxtNombre.value == " ":
+                self.controller.Start_snackbar("Error al actualizar", ft.Colors.RED, 4000)
+                raise ValueError("No se ha seleccionado ningun producto")
+            
+            lista_valores_insert = [
+                str(self.TxtNombre.value).upper(),
+                str(self.TxtClave.value).upper(),
+                str(self.TxtPresentacion.value).upper(),
+                str(self.TxtMarca.value).upper(),
+                str(self.TxtHistoria.value).upper(),
+                
+                self.TxtPorcion.value,
+                self.TxtContenido_Energetico.value,
+                self.TxtProteina.value,
+                self.TxtGrasas_Totales.value,
+                self.TxtGrasas_Saturadas.value,
+                self.TxtGrasas_Trans.value,
+                self.TxtCarbohidratos.value,
+                self.TxtAzucares_Totales.value,
+                self.TxtAzucares_Anadidos.value,
+                self.TxtFibra_Dietetica.value,
+                self.TxtSodio.value,
+                self.TxtHumedad.value,
+                self.TxtGrasa_Butirica_Min.value,
+                self.TxtProteina_Min.value,
+                self.TxtIngredientes.value,
+                self.TxtDescripcion.value,
+                self.Categorias_Producto.value
+            ]
+            
+            self.controller.Execute_Query(f"""
+                INSERT INTO PRODUCTOS (
+                    NOMBRE,
+                    CLAVE,
+                    PRESENTACION,
+                    MARCA,
+                    HISTORIA
+                    
+                ) VALUES (
+                    %s, %s, %s, %s, %s
+                );
+                
+                
+                SET @ID = LAST_INSERT_ID();
+                
+                INSERT INTO TABLA_ALIMENTICIA (
+                    ID_PRODUCTO,
+                    PORCION,
+                    CONTENIDO_ENERGETICO,
+                    PROTEINA,
+                    GRASAS_TOTALES,
+                    GRASAS_SATURADAS,
+                    GRASAS_TRANS,
+                    CARBOHIDRATOS,
+                    AZUCARES_TOTALES,
+                    AZUCARES_AÑADIDOS,
+                    FIBRA_DIETETICA,
+                    SODIO,
+                    HUMEDAD,
+                    GRASA_BUTIRICA_MIN,
+                    PROTEINA_MIN,
+                    INGREDIENTES,
+                    DESCRIPCION,
+                    ID_CATEGORIA
+                ) VALUES (
+                    @ID, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                );
+            """,lista_valores_insert)
+            self.Write_Table_Productos()
+            self.Clear_Form_All()
+            self.controller.Start_snackbar("Registro creado", ft.Colors.GREEN, 4000)
+        except Exception as err:
+            self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
         
     def Clear_Form_All(self):
         self.Clear_Form_General()
@@ -421,6 +497,7 @@ class Home:
                     TABLA_ALIMENTICIA.PROTEINA_MIN,
                     TABLA_ALIMENTICIA.INGREDIENTES,
                     TABLA_ALIMENTICIA.DESCRIPCION,
+                    TABLA_ALIMENTICIA.ID_CATEGORIA,
                     CATEGORIAS.NOMBRE
                 FROM
                     PRODUCTOS
@@ -506,11 +583,11 @@ class Home:
                 
             match data:
                 case "Limpiar Etiqueta":
-                    #self.controller.Execute_Query(f"""
-                    #    UPDATE PRODUCTOS
-                    #    SET IMAGEN_ETIQUETA = %s
-                    #    WHERE ID_PRODUCTOS = %s;
-                    #""",(None, Id))
+                    self.controller.Execute_Query(f"""
+                        UPDATE PRODUCTOS
+                        SET IMAGEN_ETIQUETA = %s
+                        WHERE ID_PRODUCTOS = %s;
+                    """,(None, Id))
                     self.controller.Start_snackbar("Imagen Eliminada", ft.Colors.GREEN, 4000)
                 case "Limpiar Imagen":
                     self.Controller.Execute_Query(f"""
