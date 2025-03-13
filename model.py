@@ -15,6 +15,12 @@ class Model:
         values = cursor.execute_query(Query, params)
         return values
     
+    def Execute_Multiple_Queries(self, queries: list, params_list: list = None):
+        """Ejecuta multiples Query de MySQL al mismo tiempo"""
+        cursor = sql.DataBase()
+        Values = cursor.execute_multiple_queries(queries, params_list)
+        return Values
+    
     def Encode_Imagen(self, Ruta: str):
         """Convertir imagen a binario"""
         

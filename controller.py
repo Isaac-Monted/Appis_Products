@@ -125,6 +125,20 @@ class Controller:
         
         return values
     
+    def Execute_Multiple_Queries(self, queries: list, params_list: list = None):
+        """Ejecuta múltiples consultas SQL de manera secuencial en una transacción.
+
+        Args:
+            queries (list): Lista de consultas SQL a ejecutar.
+            params_list (list): Lista de tuplas de parámetros correspondientes a cada consulta.
+
+        Returns:
+            bool: True si todas las consultas se ejecutaron correctamente, False en caso de error.
+        """
+        values = self.model.Execute_Multiple_Queries(queries, params_list)
+        
+        return values
+    
     def Convert_image_to_binary(self,Mode:str, Root:str = None, Imagen_binary: bytes = None):
         """Mostrar la barra de la aplicacion"""
         match Mode:
