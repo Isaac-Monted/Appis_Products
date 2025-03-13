@@ -353,8 +353,7 @@ class Home:
             
             categoria = self.Categorias_Producto.value if self.Categorias_Producto.value else 1
             
-            queries = [
-                """
+            self.controller.Execute_Query("""
                 INSERT INTO PRODUCTOS (
                     NOMBRE,
                     CLAVE,
@@ -362,12 +361,13 @@ class Home:
                     MARCA,
                     HISTORIA
                 ) VALUES (%s, %s, %s, %s, %s);
-                """,
-                """
-                SET @ID = LAST_INSERT_ID();
-                """,
-                """
+                """,(str(self.TxtNombre.value).upper(), str(self.TxtClave.value).upper(), str(self.TxtPresentacion.value).upper(), str(self.TxtMarca.value).upper(), self.TxtHistoria.value ))
+            
+            New_id = self.controller.Execute_Query("SELECT PRODUCTOS.ID_PRODUCTOS FROM PRODUCTOS ORDER BY ID_PRODUCTOS DESC LIMIT 1;")[0][0]
+            
+            self.controller.Execute_Query("""
                 INSERT INTO TABLA_ALIMENTICIA (
+                    ID_PRODUCTO,
                     PORCION,
                     CONTENIDO_ENERGETICO,
                     PROTEINA,
@@ -385,46 +385,14 @@ class Home:
                     INGREDIENTES,
                     DESCRIPCION,
                     ID_CATEGORIA
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-                """
-            ]
+                ) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                """,(New_id, self.TxtPorcion.value, self.TxtContenido_Energetico.value, self.TxtProteina.value, self.TxtGrasas_Totales.value, self.TxtGrasas_Saturadas.value, self.TxtGrasas_Trans.value, self.TxtCarbohidratos.value, self.TxtAzucares_Totales.value, self.TxtAzucares_Anadidos.value, self.TxtFibra_Dietetica.value, self.TxtSodio.value, self.TxtHumedad.value, self.TxtGrasa_Butirica_Min.value, self.TxtProteina_Min.value, self.TxtIngredientes.value, self.TxtDescripcion.value, categoria))
             
-            lista_valores_insert = [
-                (
-                    str(self.TxtNombre.value).upper(),
-                    str(self.TxtClave.value).upper(),
-                    str(self.TxtPresentacion.value).upper(),
-                    str(self.TxtMarca.value).upper(),
-                    str(self.TxtHistoria.value).upper()
-                ),
-                (),
-                (
-                    self.TxtPorcion.value,
-                    self.TxtContenido_Energetico.value,
-                    self.TxtProteina.value,
-                    self.TxtGrasas_Totales.value,
-                    self.TxtGrasas_Saturadas.value,
-                    self.TxtGrasas_Trans.value,
-                    self.TxtCarbohidratos.value,
-                    self.TxtAzucares_Totales.value,
-                    self.TxtAzucares_Anadidos.value,
-                    self.TxtFibra_Dietetica.value,
-                    self.TxtSodio.value,
-                    self.TxtHumedad.value,
-                    self.TxtGrasa_Butirica_Min.value,
-                    self.TxtProteina_Min.value,
-                    self.TxtIngredientes.value,
-                    self.TxtDescripcion.value,
-                    categoria
-                )
-            ]
-            
-            self.controller.Execute_Multiple_Queries(queries,lista_valores_insert)
             self.Write_Table_Productos()
             self.Clear_Form_All()
             self.controller.Start_snackbar("Registro creado", ft.Colors.GREEN, 4000)
         except Exception as err:
-            self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
+            self.controller.Start_alert_dialog(type="error", title="Error", message="Error al registrar", description=err,)
         
     def Clear_Form_All(self):
         self.Clear_Form_General()
@@ -655,7 +623,8 @@ class Home:
                     CLAVE = %s,
                     PRESENTACION = %s,
                     MARCA = %s,
-                    HISTORIA = %s
+                    HISTORIA = %s,
+                    STATUS = %s
                 WHERE ID_PRODUCTOS = %s;
                 """,
                 """
@@ -676,7 +645,8 @@ class Home:
                     PROTEINA_MIN = %s,
                     INGREDIENTES = %s,
                     DESCRIPCION = %s,
-                    ID_CATEGORIA = %s
+                    ID_CATEGORIA = %s,
+                    STATUS = %s
                 WHERE ID_PRODUCTO = %s;
                 """
             ]
@@ -687,8 +657,9 @@ class Home:
                     str(self.TxtClave.value).upper(),
                     str(self.TxtPresentacion.value).upper(),
                     str(self.TxtMarca.value).upper(),
-                    str(self.TxtHistoria.value).upper(),
-                    self.TxtID.value
+                    self.TxtHistoria.value,
+                    self.Estado_Producto.value,
+                    self.TxtID.value,
                 ),
                 (
                     self.TxtPorcion.value,
@@ -708,6 +679,7 @@ class Home:
                     self.TxtIngredientes.value,
                     self.TxtDescripcion.value,
                     categoria,
+                    self.Estado_Producto.value,
                     self.TxtID.value
                 )
             ]
@@ -715,7 +687,7 @@ class Home:
             self.controller.Execute_Multiple_Queries(queries,lista_valores_insert)
             self.Write_Table_Productos()
             self.Clear_Form_All()
-            self.controller.Start_snackbar("Registro creado", ft.Colors.GREEN, 4000)
+            self.controller.Start_snackbar("Registro actualizado", ft.Colors.GREEN, 4000)
         except Exception as err:
             self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
         

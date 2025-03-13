@@ -112,6 +112,13 @@ class DataBase:
                         result = self.cursor.fetchall()
                         return result  # Devuelve las filas seleccionadas
                     print(f"Estado de la conexion en el fin del ciclo: {self.conn.is_connected()}")
+                    
+                    if not self.conn.is_connected():
+                        print(f"Conexión perdida antes de ejecutar la consulta {i + 1}. Intentando reconectar.")
+                        self.conn.ping(reconnect=True)  # Intenta reconectar si la conexión está perdida
+                        if not self.conn.is_connected():
+                            print("No se pudo reconectar con la base de datos.")
+                            return False
                 except Exception as e:
                     print(f"Error en la consulta {i + 1}: {e}")
                     self.conn.rollback()  # Revertir en caso de error en la consulta
