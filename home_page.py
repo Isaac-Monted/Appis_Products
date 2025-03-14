@@ -1,4 +1,5 @@
 import flet as ft
+import json as js
 
 class Home:
     def __init__(self, page: ft.Page, controller):
@@ -8,6 +9,7 @@ class Home:
         
         self.Estados_de_productos = ['ACTIVO', 'INACTIVO', 'DESCONOCIDO']
         self.Categoria_de_Productos = self.controller.Execute_Query("SELECT CATEGORIAS.ID_CATEGORIA, CATEGORIAS.NOMBRE FROM CATEGORIAS WHERE STATUS = 'ACTIVO';")
+        self.Recetas_de_Productos = self.controller.Execute_Query("SELECT RECETAS.ID_RESETA, RECETAS.NOMBRE FROM RECETAS WHERE STATUS = 'ACTIVO';")
         
         # Componentes
         self.table_productos = ft.DataTable(
@@ -115,6 +117,56 @@ class Home:
         
         self.BtnLimpiar_Tabla_Alimentacia = ft.FilledButton(text="Limpiar Contenido", icon=ft.Icons.CLEANING_SERVICES, data="Limpiar Nutrimental", on_click=self.on_click_buttons_form)
         
+        self.table_recetas = ft.DataTable(
+            expand=True,
+            heading_row_color=ft.Colors.PRIMARY,
+            columns=[
+                ft.DataColumn(
+                    label=ft.Text("Id", color=ft.Colors.SURFACE, size=15, weight=ft.FontWeight.BOLD),
+                    on_sort=self.on_sort_table,
+                    visible=False,
+                ),
+                ft.DataColumn(
+                    label=ft.Text("Receta", color=ft.Colors.SURFACE, size=15, weight=ft.FontWeight.BOLD),
+                    on_sort=self.on_sort_table,
+                    tooltip="Nombre del producto",
+                ),
+                ft.DataColumn(
+                    label=ft.Text("Descripcion", color=ft.Colors.SURFACE, size=15, weight=ft.FontWeight.BOLD),
+                    on_sort=self.on_sort_table,
+                    tooltip="Clave del producto"
+                ),
+                
+            ],
+            rows=[]
+        )
+        self.container_table_resetas = ft.Container(
+            padding=10,
+            content=ft.Column(
+                alignment=ft.MainAxisAlignment.START,
+                #expand=True,
+                scroll=ft.ScrollMode.AUTO,
+                height=300,
+                controls=[
+                    ft.Row(
+                        expand=True,
+                        controls=[
+                            self.table_recetas
+                        ]
+                    )
+                ]
+            )
+        )
+        self.BtnAgregar_receta = ft.FilledButton(text="Agregar Receta", icon=ft.Icons.SAVE, col={"xs":12, "sm":6, "md":5, "lg":2}, data="Agregar receta", on_click=self.on_click_buttons_form)
+        self.BtnLimpiar_receta = ft.FilledButton(text="Limpiar Receta", icon=ft.Icons.CLEANING_SERVICES, col={"xs":12, "sm":6, "md":5, "lg":2}, data="Limpiar receta", on_click=self.on_click_buttons_form)
+        self.BtnEliminar_receta= ft.FilledButton(text="Eliminar Receta", icon=ft.Icons.DELETE, col={"xs":12, "sm":6, "md":5, "lg":2}, data="Eliminar receta", on_click=self.on_click_buttons_form)
+        self.TxtID_receta = ft.TextField(label="Id de la Receta", visible=False)
+        self.LabelNombre_receta = ft.Text(value="Receta Seleccionada: ", size=18)
+        self.Recetas_Producto = ft.Dropdown(
+            label="Receta del Producto",
+            options=[ft.dropdown.Option(receta[0],receta[1]) for receta in self.Recetas_de_Productos]
+        )
+        
         # Llenar la tabla con los registros
         self.Write_Table_Productos()
     
@@ -221,6 +273,16 @@ class Home:
                                                 scroll=ft.ScrollMode.ADAPTIVE,
                                                 controls=[
                                                     ft.Text("Resetas con este Producto", size=20, weight= ft.FontWeight.BOLD),
+                                                    self.container_table_resetas,
+                                                    ft.Divider(height=2,color=ft.Colors.TRANSPARENT),
+                                                    ft.ResponsiveRow(controls=[
+                                                        self.BtnAgregar_receta,
+                                                        self.BtnLimpiar_receta,
+                                                        self.BtnEliminar_receta,
+                                                    ]),
+                                                    self.TxtID_receta,
+                                                    self.LabelNombre_receta,
+                                                    self.Recetas_Producto,
                                                 ]
                                             )
                                         )
@@ -273,6 +335,28 @@ class Home:
         self.table_productos.rows = Rows
         self.page.update()
         
+    def Write_Table_Recetas(self, Id):
+        Array =  self.Read_Dates("Tabla Recetas", Id)
+        print(Array)
+        Rows = []
+        for registr in Array:
+            if registr[1] == "" or registr[1] == " ":
+                continue
+            
+            Rows.append(
+                ft.DataRow(
+                    selected=True,
+                    on_select_changed=self.on_selected_table_recetas,
+                    cells=[
+                        ft.DataCell(content=ft.Text(value=str(registr[0])), visible=False),
+                        ft.DataCell(content=ft.Text(value=registr[1])),
+                        ft.DataCell(content=ft.Text(value=registr[2])),
+                    ]
+                )
+            )
+            
+        self.table_recetas.rows = Rows
+        self.page.update()
         
     def on_selected_table(self, e):
         id = e.control.cells[0].content.value
@@ -308,8 +392,21 @@ class Home:
             self.TxtIngredientes.value = valores[21]
             self.TxtDescripcion.value = valores[22]
             
+            self.Write_Table_Recetas(valores[0])
+            
         self.page.update()
             
+    def on_selected_table_recetas(self, e):
+        id = e.control.cells[0].content.value
+        if id != None or id != "0":
+            valores = self.Read_Dates("Receta", id)[0]
+            
+            print(valores)
+            self.TxtID_receta.value = valores[0]
+            self.LabelNombre_receta.value = f"Receta Seleccionada: {valores[1]}"
+            self.Recetas_Producto.value = valores[0]
+            
+        self.page.update()
     
     def on_sort_table(self, e):
         pass
@@ -323,8 +420,6 @@ class Home:
                 self.Clear_Form_All()
             case "Editar":
                 self.Update_Registrer()
-            case "Eliminar":
-                self.Delete_Register()
             case "Add Etiqueta":
                 self.controller.Start_file_picker("Abrir", "Etiqueta", self.TxtID.value)
             case "Ver Etiqueta":
@@ -337,11 +432,20 @@ class Home:
             case "Ver Imagen":
                 self.ViewImage(e.control.data)
             case "Limpiar Imagen":
-                self.ClearImagen(e.control.data)
+                self.controller.Start_alert_dialog(type="options", title="Confirmar", message="Esta seguro de Eliminar la imagen", actions=["Aceptar","Cancelar","Ver"], functions=[lambda: self.ClearImagen("Limpiar Imagen"), None, lambda: self.ViewImage("Limpiar Imagen")])
+                #self.ClearImagen(e.control.data)
             case "Limpiar Producto":
                 self.Clear_Form_General()
             case "Limpiar Nutrimental":
                 self.Clear_Form_Nutrimental()
+            case "Eliminar":
+                self.controller.Start_alert_dialog(type="options", title="Confirmar", message="Esta seguro de Eliminar el producto", actions=["Aceptar","Cancelar","Ocultar"], functions=[lambda: self.Delete_Register("Permanente"), None, lambda: self.Delete_Register("Temporal")])
+            case "Agregar receta":
+                self.Create_receta()
+            case "Limpiar receta":
+                self.Clear_recetas()
+            case "Eliminar receta":
+                self.Delete_recetas()
             case _:
                 ...
                 
@@ -393,43 +497,9 @@ class Home:
             self.controller.Start_snackbar("Registro creado", ft.Colors.GREEN, 4000)
         except Exception as err:
             self.controller.Start_alert_dialog(type="error", title="Error", message="Error al registrar", description=err,)
-        
-    def Clear_Form_All(self):
-        self.Clear_Form_General()
-        self.Clear_Form_Nutrimental()
-        
-    def Clear_Form_General(self):
-        self.TxtID.value = ""
-        self.TxtNombre.value = ""
-        self.LabelNombre.value = "Producto Seleccionado: "
-        self.TxtClave.value = ""
-        self.TxtPresentacion.value = ""
-        self.TxtMarca.value = ""
-        self.TxtHistoria.value = ""
-        self.Estado_Producto.value = ""
-        self.Categorias_Producto.value = ""
-        
-        self.page.update()
-        
-    def Clear_Form_Nutrimental(self):
-        self.TxtPorcion.value = ""
-        self.TxtContenido_Energetico.value = ""
-        self.TxtProteina.value = ""
-        self.TxtGrasas_Totales.value = ""
-        self.TxtGrasas_Saturadas.value = ""
-        self.TxtGrasas_Trans.value = ""
-        self.TxtCarbohidratos.value = ""
-        self.TxtAzucares_Totales.value = ""
-        self.TxtAzucares_Anadidos.value = ""
-        self.TxtFibra_Dietetica.value = ""
-        self.TxtSodio.value = ""
-        self.TxtHumedad.value = ""
-        self.TxtGrasa_Butirica_Min.value = ""
-        self.TxtProteina_Min.value = ""
-        self.TxtIngredientes.value = ""
-        self.TxtDescripcion.value = ""
-        
-        self.page.update()
+            
+    def Create_receta(self):
+        ...
         
     def Read_Dates(self, Mode:str, Id:str = None):
         match Mode:
@@ -542,10 +612,79 @@ class Home:
                     PRODUCTOS
                 WHERE ID_PRODUCTOS = {Id};
             """)
+            case "Tabla Recetas":
+                Datos = []
+                recetas = self.controller.Execute_Query(f"""
+                SELECT
+                    PRODUCTOS.RESETAS
+                FROM
+                    PRODUCTOS
+                WHERE ID_PRODUCTOS = {Id};
+            """)
+                dic_recetas = js.loads(recetas[0][0])
+                print(dic_recetas)
+                for clave, valor in dic_recetas.items():
+                    print(f"Clave: {clave}, Valor: {valor}")
+                    contenido = self.controller.Execute_Query(f"""
+                        SELECT
+                            RECETAS.ID_RESETA,
+                            RECETAS.NOMBRE,
+                            RECETAS.DESCRIPCION
+                        FROM
+                            RECETAS
+                        WHERE ID_RESETA = {valor};
+                    """)
+                    Datos.append(contenido[0])
+            case "Receta":
+                Datos = self.controller.Execute_Query(f"""
+                SELECT
+                    RECETAS.NOMBRE,
+                    RECETAS.DESCRIPCION
+                FROM
+                    RECETAS
+                WHERE ID_RESETA = {Id};
+            """)
             case _:
                 Datos = []
                 
         return Datos
+    
+    def Clear_Form_All(self):
+        self.Clear_Form_General()
+        self.Clear_Form_Nutrimental()
+        
+    def Clear_Form_General(self):
+        self.TxtID.value = ""
+        self.TxtNombre.value = ""
+        self.LabelNombre.value = "Producto Seleccionado: "
+        self.TxtClave.value = ""
+        self.TxtPresentacion.value = ""
+        self.TxtMarca.value = ""
+        self.TxtHistoria.value = ""
+        self.Estado_Producto.value = ""
+        self.Categorias_Producto.value = ""
+        
+        self.page.update()
+        
+    def Clear_Form_Nutrimental(self):
+        self.TxtPorcion.value = ""
+        self.TxtContenido_Energetico.value = ""
+        self.TxtProteina.value = ""
+        self.TxtGrasas_Totales.value = ""
+        self.TxtGrasas_Saturadas.value = ""
+        self.TxtGrasas_Trans.value = ""
+        self.TxtCarbohidratos.value = ""
+        self.TxtAzucares_Totales.value = ""
+        self.TxtAzucares_Anadidos.value = ""
+        self.TxtFibra_Dietetica.value = ""
+        self.TxtSodio.value = ""
+        self.TxtHumedad.value = ""
+        self.TxtGrasa_Butirica_Min.value = ""
+        self.TxtProteina_Min.value = ""
+        self.TxtIngredientes.value = ""
+        self.TxtDescripcion.value = ""
+        
+        self.page.update()
     
     def ClearImagen(self, data):
         try:
@@ -574,6 +713,13 @@ class Home:
                     self.controller.Start_snackbar("Error al actualizar", ft.Colors.RED, 4000)
         except Exception as err:
             self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
+            
+    def Clear_recetas(self):
+        self.TxtID_receta = ""
+        self.LabelNombre_receta = "Receta Seleccionada: "
+        self.Recetas_Producto = ""
+        
+        self.page.update()
     
     def ViewImage(self, data):
         try:
@@ -691,5 +837,56 @@ class Home:
         except Exception as err:
             self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
         
-    def Delete_Register(self):
+    def Delete_Register(self, Eliminacion):
+        try:
+            if self.TxtID.value == "" or self.TxtID.value == " ":
+                Id = 1
+                raise ValueError("No se ha seleccionado ningun producto")
+            
+            match Eliminacion:
+                case "Temporal":
+                    querys = [
+                    """
+                        UPDATE PRODUCTOS
+                        SET STATUS = %s
+                        WHERE ID_PRODUCTOS = %s;
+                    """,
+                    """
+                        UPDATE TABLA_ALIMENTICIA
+                        SET STATUS = %s
+                        WHERE ID_PRODUCTO = %s;
+                    """
+                    ]
+                    parameters = [
+                        ('INACTIVO', Id),
+                        ('INACTIVO', Id)
+                    ]
+                    
+                    self.controller.Execute_Multiple_Queries(querys, parameters)
+                    self.controller.Start_snackbar("Imagen Eliminada", ft.Colors.GREEN, 4000)
+                case "Permanente":
+                    querys = [
+                    """
+                        DELETE FROM PRODUCTOS
+                        WHERE ID_PRODUCTOS = %s;
+                    """,
+                    """
+                        DELETE FROM TABLA_ALIMENTICIA
+                        WHERE ID_PRODUCTO = %s;
+                    """
+                    ]
+                    parameters = [
+                        (Id),
+                        (Id)
+                    ]
+                    
+                    self.controller.Execute_Multiple_Queries(querys, parameters)
+                    self.controller.Start_snackbar("Imagen Eliminada", ft.Colors.GREEN, 4000)
+                case _:
+                    self.controller.Start_snackbar("Error al actualizar", ft.Colors.RED, 4000)
+        except Exception as err:
+            self.controller.Start_alert_dialog(type="error", title="Error", message="Error al eliminar", description=err,)
+            
+    def Delete_recetas(self):
         ...
+        
