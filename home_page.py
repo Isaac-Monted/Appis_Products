@@ -499,8 +499,41 @@ class Home:
             self.controller.Start_alert_dialog(type="error", title="Error", message="Error al registrar", description=err,)
             
     def Create_receta(self):
-        ...
-        
+        try:
+            if self.TxtID.value == "" or self.TxtID.value == " ":
+                Id = 1
+                lista = ()
+                raise ValueError("No se ha seleccionado ningun producto")
+            else:
+                if self.Recetas_Producto.value == None:
+                    raise ValueError("No se ha seleccionado ninguna receta")
+                
+                Id = self.TxtID.value
+                lista = self.Read_Dates("Dict receta", Id)[0]
+                print(lista)
+                map_recetas = js.loads(lista[0])
+                
+                for valor in map_recetas:
+                    if valor == self.Recetas_Producto.value:
+                        raise ValueError("La receta ya esta registrada")
+                    
+                new_receta = self.Read_Dates("Receta", self.Recetas_Producto.value)[0]
+                map_recetas.update({f'{new_receta[0]}':new_receta[1]})
+                print(map_recetas)
+            try:
+                self.controller.Execute_Query(f"""
+                    UPDATE PRODUCTOS
+                    SET RESETAS = %s
+                    WHERE ID_PRODUCTOS = %s;
+                """,(js.dumps(map_recetas), Id))
+                self.Clear_recetas()
+                self.Write_Table_Recetas(Id)
+                self.controller.Start_snackbar("Reseta agregada", ft.Colors.GREEN, 4000)
+            except:
+                self.controller.Start_snackbar("Error al agregar", ft.Colors.RED, 4000)
+        except Exception as err:
+            self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
+            
     def Read_Dates(self, Mode:str, Id:str = None):
         match Mode:
             case "Tabla":
@@ -632,12 +665,21 @@ class Home:
                             RECETAS.DESCRIPCION
                         FROM
                             RECETAS
-                        WHERE ID_RESETA = {valor};
+                        WHERE ID_RESETA = {clave};
                     """)
                     Datos.append(contenido[0])
+            case "Dict receta":
+                Datos = self.controller.Execute_Query(f"""
+                SELECT
+                    PRODUCTOS.RESETAS
+                FROM
+                    PRODUCTOS
+                WHERE ID_PRODUCTOS = {Id};
+            """)
             case "Receta":
                 Datos = self.controller.Execute_Query(f"""
                 SELECT
+                    RECETAS.ID_RESETA,
                     RECETAS.NOMBRE,
                     RECETAS.DESCRIPCION
                 FROM
@@ -652,6 +694,8 @@ class Home:
     def Clear_Form_All(self):
         self.Clear_Form_General()
         self.Clear_Form_Nutrimental()
+        self.Clear_recetas()
+        self.table_recetas.rows = []
         
     def Clear_Form_General(self):
         self.TxtID.value = ""
@@ -715,9 +759,9 @@ class Home:
             self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
             
     def Clear_recetas(self):
-        self.TxtID_receta = ""
-        self.LabelNombre_receta = "Receta Seleccionada: "
-        self.Recetas_Producto = ""
+        self.TxtID_receta.value = ""
+        self.LabelNombre_receta.value = "Receta Seleccionada: "
+        self.Recetas_Producto.value = ""
         
         self.page.update()
     
@@ -888,5 +932,34 @@ class Home:
             self.controller.Start_alert_dialog(type="error", title="Error", message="Error al eliminar", description=err,)
             
     def Delete_recetas(self):
-        ...
+        try:
+            if self.TxtID.value == "" or self.TxtID.value == " ":
+                Id = 1
+                lista = ()
+                raise ValueError("No se ha seleccionado ningun producto")
+            else:
+                if self.TxtID_receta.value == "" or self.TxtID_receta.value == " ":
+                    raise ValueError("No se ha seleccionado ninguna receta")
+                
+                Id = self.TxtID.value
+                lista = self.Read_Dates("Dict receta", Id)[0]
+                print(lista)
+                map_recetas = js.loads(lista[0])
+                print(map_recetas)
+
+                map_recetas.pop(f'{self.Recetas_Producto.value}')
+                print(map_recetas)
+            try:
+                self.controller.Execute_Query(f"""
+                    UPDATE PRODUCTOS
+                    SET RESETAS = %s
+                    WHERE ID_PRODUCTOS = %s;
+                """,(js.dumps(map_recetas), Id))
+                self.Clear_recetas()
+                self.Write_Table_Recetas(Id)
+                self.controller.Start_snackbar("Reseta agregada", ft.Colors.GREEN, 4000)
+            except:
+                self.controller.Start_snackbar("Error al actualizar", ft.Colors.RED, 4000)
+        except Exception as err:
+            self.controller.Start_alert_dialog(type="error", title="Error", message="Error al actualizar", description=err,)
         
