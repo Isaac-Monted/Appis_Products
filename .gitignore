@@ -1,3 +1,4 @@
 settings.env
 *.env
 base de datos.xlsx
+/build
